@@ -5,9 +5,8 @@ from torch.optim import Adam
 from torch.distributions import Normal
 import numpy as np
 
-################################## set device ##################################
-print("============================================================================================")
 # set device to cpu or cuda
+print("============================================================================================")
 device = torch.device('cpu')
 if(torch.cuda.is_available()): 
     device = torch.device('cuda:0') 
@@ -17,7 +16,7 @@ else:
     print("Device set to : cpu")
 print("============================================================================================")
 
-################################## Utilities ##################################
+# Utilities 
 def soft_update(target, source, tau):
     for target_param, param in zip(target.parameters(), source.parameters()):
         target_param.data.copy_(target_param.data * (1.0 - tau) + param.data * tau)
@@ -26,7 +25,7 @@ def hard_update(target, source):
     for target_param, param in zip(target.parameters(), source.parameters()):
         target_param.data.copy_(param.data)
 
-################################## Replay Buffer ##################################
+# Replay Buffer 
 class ReplayMemory:
     def __init__(self, capacity, seed):
         np.random.seed(seed)
@@ -48,7 +47,7 @@ class ReplayMemory:
     def __len__(self):
         return len(self.buffer)
 
-################################## Networks ##################################
+#Networks 
 class GaussianPolicy(nn.Module):
     def __init__(self, num_inputs, num_actions, hidden_dim, action_space=None):
         super(GaussianPolicy, self).__init__()
@@ -88,7 +87,7 @@ class GaussianPolicy(nn.Module):
         mean, log_std = self.forward(state)
         std = log_std.exp()
         normal = Normal(mean, std)
-        x_t = normal.rsample()  # for reparameterization trick (mean + std * N(0,1))
+        x_t = normal.rsample()  # for reparameterization trick 
         y_t = torch.tanh(x_t)
         action = y_t * self.action_scale + self.action_bias
         log_prob = normal.log_prob(x_t)
@@ -137,7 +136,7 @@ class QNetwork(nn.Module):
 
         return x1, x2
 
-################################## SAC Agent ##################################
+# SAC Agent 
 class SAC:
     def __init__(self, state_dim, action_dim, lr_actor, lr_critic, gamma, tau, alpha, target_update_interval, automatic_entropy_tuning, hidden_size, replay_size, seed, action_space):
         
